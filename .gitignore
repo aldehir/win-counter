@@ -1,0 +1,8 @@
+# Build artifacts
+win-counter
+*.o
+*.s
+
+# Clangd files
+.clangd/
+compile_commands.json
