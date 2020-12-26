@@ -2,7 +2,14 @@
 win-counter
 *.o
 *.s
+.generated/
 
 # Clangd files
 .clangd/
 compile_commands.json
+
+# Python files
+.venv/
+__pycache__/
+*.pyc
+*.pyo
