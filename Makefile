@@ -10,7 +10,7 @@ CFLAGS = -mmcu=$(mmcu) -DF_CPU=$(f_cpu) -Wall -Wextra -c -g -std=gnu11 \
 
 AVRDUDE = avrdude
 
-.PHONY: all flash clean
+.PHONY: all flash watch clean
 
 all: win-counter
 
@@ -28,3 +28,6 @@ clean:
 
 flash: win-counter
 	avrdude -v -pm328p -carduino -P$(PORT) -b57600 -D -Uflash:w:win-counter:e
+
+watch:
+	-socat -d $(PORT),b115200,raw,echo=0 -
