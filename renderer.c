@@ -72,6 +72,12 @@ static void rgb_alpha_blend(uint8_t alpha, const rgb_t *fg, const rgb_t *bg, rgb
 }
 
 
+void render_init(render_context_t *ctx, ili9340_t *device) {
+  ctx->device = device;
+  ctx->_x = ctx->_y = ctx->_width = ctx->_height = 0;
+}
+
+
 void render_rectangle(render_context_t *ctx,
     uint16_t x, uint16_t y, uint16_t width, uint16_t height,
     const rgb_t *color) {

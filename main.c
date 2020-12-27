@@ -11,7 +11,7 @@
 
 
 ili9340_t tft = {&spi, B2, D6, D5};
-render_context_t renderer = {&tft};
+render_context_t renderer;
 
 rgb_t background_color = { 0x23, 0x25, 0x2b };
 rgb_t foreground_color = { 0xff, 0xff, 0xff };
@@ -26,6 +26,7 @@ static void initialize(void) {
   serial_init(&serial0, 115200);
   spi_init(&spi);
   ili9340_init(&tft);
+  render_init(&renderer, &tft);
 }
 
 

@@ -21,6 +21,8 @@ typedef struct {
 } rgb_t;
 
 
+void render_init(render_context_t *ctx, ili9340_t *device);
+
 void render_rectangle(render_context_t *ctx,
     uint16_t x, uint16_t y, uint16_t width, uint16_t height,
     const rgb_t *color);
