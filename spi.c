@@ -17,10 +17,9 @@ void spi_init(spi_t *spi) {
 
   set_bit(*spi->spcr, SPE);
   set_bit(*spi->spcr, MSTR);
-  /*
-  set_bit(*spi->spcr, SPR1);
-  set_bit(*spi->spcr, SPR0);
-  */
+
+  clear_bit(*spi->spcr, SPR1);
+  clear_bit(*spi->spcr, SPR0);
   set_bit(*spi->spsr, SPI2X);
 }
 
