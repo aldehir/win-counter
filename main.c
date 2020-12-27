@@ -16,6 +16,7 @@ render_context_t renderer = {&tft};
 rgb_t background_color = { 0x23, 0x25, 0x2b };
 rgb_t foreground_color = { 0xff, 0xff, 0xff };
 
+rgb_t white_color = { 0xff, 0xff, 0xff };
 rgb_t red_color = { 0xff, 0x00, 0x66 };
 rgb_t green_color = { 0x00, 0xff, 0xa8 };
 rgb_t gold_color = { 0xff, 0xea, 0x00 };
@@ -33,12 +34,13 @@ int main(void) {
 
   render_background(&renderer, &background_color);
 
-  uint16_t x = ((320 - glyph_1.width - 2 * glyph_0.width) / 2) - 1;
-  uint16_t y = ((240 - glyph_1.height) / 2) - 1;
+  uint16_t x = ((320 - separator.width) / 2) - 1;
+  uint16_t y = ((240 - separator.height) / 2) - 1;
 
-  render_image(&renderer, x, y, &glyph_1, &red_color, &background_color);
-  render_image(&renderer, x + glyph_1.width, y, &glyph_0, &green_color, &background_color);
-  render_image(&renderer, x + glyph_1.width + glyph_0.width, y, &glyph_0, &gold_color, &background_color);
+  render_image(&renderer, x, y, &separator, &white_color, &background_color);
+
+  render_image(&renderer, 55, 30, &glyph_1, &green_color, &background_color);
+  render_image(&renderer, 55 + glyph_1.width, 30, &glyph_0, &green_color, &background_color);
 
   while (1);
 
