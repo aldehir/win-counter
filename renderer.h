@@ -6,6 +6,11 @@
 
 typedef struct {
   ili9340_t *device;
+
+  uint16_t _x;
+  uint16_t _y;
+  uint16_t _width;
+  uint16_t _height;
 } render_context_t;
 
 

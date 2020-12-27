@@ -4,23 +4,37 @@
 #include <avr/pgmspace.h>
 
 
-#define wrap_coordinates(width, x, y) do {          \
-    if ((x) == width) {                             \
-      (x) = 0;                                      \
-      (y)++;                                        \
-    }                                               \
+#define set_ctx(ctx, x, y, width, height) do {    \
+    (ctx)->_x = (x);                              \
+    (ctx)->_y = (y);                              \
+  } while(0);
+
+#define wrap_coordinates(ctx) do {          \
+    if ((ctx)->_x == (ctx)->_width) {       \
+      (ctx)->_x = 0;                        \
+      (ctx)->_y++;                          \
+    }                                       \
   } while(0)
 
 
-static void fill_to(render_context_t *ctx,
-    ili9340_color_t *color,
-    uint16_t *x, uint16_t *y,
-    uint16_t dest_x, uint16_t dest_y,
-    uint16_t width) {
+static void render_context_set_region(render_context_t *ctx,
+    uint16_t x, uint16_t y,
+    uint16_t width, uint16_t height) {
 
-  while (*x < dest_x || *y < dest_y) {
-    *x += 1;
-    wrap_coordinates(width, *x, *y);
+  ili9340_set_draw_region(ctx->device, x, y, width, height);
+  ili9340_memory_write(ctx->device);
+
+  ctx->_x = ctx->_y = 0;
+  ctx->_width = width;
+  ctx->_height = height;
+}
+
+
+static void fill_to(render_context_t *ctx, ili9340_color_t *color,
+    uint16_t dest_x, uint16_t dest_y) {
+  while (ctx->_x < dest_x || ctx->_y < dest_y) {
+    ctx->_x++;
+    wrap_coordinates(ctx);
     ili9340_push(ctx->device, *color);
   }
 }
@@ -51,14 +65,8 @@ void render_rectangle(render_context_t *ctx,
   ili9340_color_t color_6bit;
   rgb_to_ili9340_color(color, &color_6bit);
 
-  ili9340_set_draw_region(ctx->device, x, y, width, height);
-  ili9340_memory_write(ctx->device);
-
-  for (uint16_t i = 0; i < width; i++) {
-    for (uint16_t j = 0; j < height; j++) {
-      ili9340_push(ctx->device, color_6bit);
-    }
-  }
+  render_context_set_region(ctx, x, y, width,height);
+  fill_to(ctx, &color_6bit, 0, height);
 }
 
 
@@ -71,14 +79,10 @@ void render_image(render_context_t *ctx, uint16_t x, uint16_t y,
 
   uint8_t *ptr = image->data;
   uint16_t lines = image->lines;
-
-  uint16_t current_x = 0;
-  uint16_t current_y = 0;
   uint16_t line_x = 0;
   uint16_t line_y = 0;
 
-  ili9340_set_draw_region(ctx->device, x, y, image->width, image->height);
-  ili9340_memory_write(ctx->device);
+  render_context_set_region(ctx, x, y, image->width, image->height);
 
   rgb_t blend;
   ili9340_color_t blend_6bit;
@@ -88,7 +92,7 @@ void render_image(render_context_t *ctx, uint16_t x, uint16_t y,
     line_y = pgm_read_word(ptr + 2);
     ptr += 4;
 
-    fill_to(ctx, &bg_6bit, &current_x, &current_y, line_x, line_y, image->width);
+    fill_to(ctx, &bg_6bit, line_x, line_y);
 
     while (1) {
       uint8_t alpha = pgm_read_byte(ptr);
@@ -102,11 +106,11 @@ void render_image(render_context_t *ctx, uint16_t x, uint16_t y,
       rgb_to_ili9340_color(&blend, &blend_6bit);
 
       ili9340_push(ctx->device, blend_6bit);
-      current_x++;
+      ctx->_x++;
     }
 
-    wrap_coordinates(image->width, current_x, current_y);
+    wrap_coordinates(ctx);
   }
 
-  fill_to(ctx, &bg_6bit, &current_x, &current_y, 0, image->height, image->width);
+  fill_to(ctx, &bg_6bit, 0, image->height);
 }
