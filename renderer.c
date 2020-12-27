@@ -17,7 +17,7 @@
   } while(0)
 
 
-static void render_context_set_region(render_context_t *ctx,
+static void set_region(render_context_t *ctx,
     uint16_t x, uint16_t y,
     uint16_t width, uint16_t height) {
 
@@ -65,7 +65,7 @@ void render_rectangle(render_context_t *ctx,
   ili9340_color_t color_6bit;
   rgb_to_ili9340_color(color, &color_6bit);
 
-  render_context_set_region(ctx, x, y, width,height);
+  set_region(ctx, x, y, width,height);
   fill_to(ctx, &color_6bit, 0, height);
 }
 
@@ -82,7 +82,7 @@ void render_image(render_context_t *ctx, uint16_t x, uint16_t y,
   uint16_t line_x = 0;
   uint16_t line_y = 0;
 
-  render_context_set_region(ctx, x, y, image->width, image->height);
+  set_region(ctx, x, y, image->width, image->height);
 
   rgb_t blend;
   ili9340_color_t blend_6bit;
