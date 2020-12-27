@@ -52,26 +52,6 @@ def iteralpha(img):
         yield (x, y), value
 
 
-def append_uint16(l, v):
-    # Little-endian order to simplify code
-    l.append(v & 0xFF)
-    l.append((v << 8) & 0xFF)
-
-
-def append_uint8(l, v):
-    l.append(v & 0xFF)
-
-
-def append_line(l, line):
-    append_uint16(l, line.x)
-    append_uint16(l, line.y)
-
-    for point in line.points:
-        append_uint8(l, point)
-
-    append_uint8(l, 0)
-
-
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "-p", "--print", action="store_true", default=False, help="print lines to stderr"
@@ -99,18 +79,14 @@ printer = LinePrinter(args.print)
 if image.mode != "RGBA":
     print("ERROR: Must provide an image with transparency", file=sys.stderr)
 
-sparse = []
-
-append_uint16(sparse, image.width)
-append_uint16(sparse, image.height)
-
+lines = []
 current_line = None
 
 for (x, y), value in iteralpha(image):
     if current_line is not None:
         if value == 0 or y != current_line.y:
             printer.print(current_line)
-            append_line(sparse, current_line)
+            lines.append(current_line)
             current_line = None
 
     if value > 0:
@@ -121,9 +97,19 @@ for (x, y), value in iteralpha(image):
 
 if current_line is not None:
     printer.print(current_line)
-    append_line(sparse, current_line)
+    lines.append(current_line)
 
 printer.end()
+
+sparse = []
+for line in lines:
+    sparse.extend([line.x & 0xFF, line.x >> 8])
+    sparse.extend([line.y & 0xFF, line.y >> 8])
+
+    for point in line.points:
+        sparse.append(point & 0xFF)
+
+    sparse.append(0)
 
 bytes_per_line = ((args.columns - 4 - 5) // 6) + 1
 
@@ -134,16 +120,23 @@ if not args.append:
     output_header.write("#include <stdint.h>\n")
     output_header.write("#include <avr/pgmspace.h>\n\n")
 
-    relative_header = os.path.relpath(args.output_header, os.path.dirname(args.output_source))
+    output_header.write("typedef struct {\n")
+    output_header.write("  uint16_t width;\n")
+    output_header.write("  uint16_t height;\n")
+    output_header.write("  uint16_t lines;\n")
+    output_header.write("  uint8_t *data;\n")
+    output_header.write("} image_t;\n\n")
+
+    relative_header = os.path.relpath(
+        args.output_header, os.path.dirname(args.output_source)
+    )
     output_source.write(f'#include "{relative_header}"\n\n')
 
 output_header.write(f"/* {input_basename} */\n")
-output_header.write(f"#define {args.var}_width {image.width}\n")
-output_header.write(f"#define {args.var}_height {image.height}\n")
-output_header.write(f"extern const uint8_t {args.var}[] PROGMEM;\n\n")
+output_header.write(f"extern const image_t {args.var};\n\n")
 
 output_source.write(f"/* {input_basename} */\n")
-output_source.write("const uint8_t %s[] PROGMEM = {\n" % args.var)
+output_source.write("const uint8_t %s_data[] PROGMEM = {\n" % args.var)
 
 grouper = zip_longest(*[iter(sparse)] * bytes_per_line, fillvalue=None)
 for group in grouper:
@@ -151,8 +144,15 @@ for group in grouper:
     output_source.write(f"    {line},\n")
 
 output_source.write("};\n\n")
+output_source.write(
+    "const image_t %s = { %d, %d, %d, (uint8_t*)%s_data };\n\n"
+    % (args.var, image.width, image.height, len(lines), args.var)
+)
 
 output_source.close()
 output_header.close()
 
+print(f"Width:  {image.width}", file=sys.stderr)
+print(f"Height: {image.height}", file=sys.stderr)
+print(f"Lines:  {len(lines)}", file=sys.stderr)
 print(f"Total size: {len(sparse)} bytes", file=sys.stderr)
