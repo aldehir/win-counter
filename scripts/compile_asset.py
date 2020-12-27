@@ -117,15 +117,9 @@ input_basename = os.path.basename(args.input_file)
 
 if not args.append:
     output_header.write("#pragma once\n\n")
-    output_header.write("#include <stdint.h>\n")
-    output_header.write("#include <avr/pgmspace.h>\n\n")
+    output_header.write('#include "resource_types.h"\n\n')
 
-    output_header.write("typedef struct {\n")
-    output_header.write("  uint16_t width;\n")
-    output_header.write("  uint16_t height;\n")
-    output_header.write("  uint16_t lines;\n")
-    output_header.write("  uint8_t *data;\n")
-    output_header.write("} image_t;\n\n")
+    output_source.write("#include <avr/pgmspace.h>\n\n")
 
     relative_header = os.path.relpath(
         args.output_header, os.path.dirname(args.output_source)
