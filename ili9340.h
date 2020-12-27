@@ -52,4 +52,5 @@ void ili9340_get_madctl(ili9340_t *dev, ili9340_madctl_t *info);
 void ili9340_set_draw_region(ili9340_t *dev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 void ili9340_memory_write(ili9340_t *dev);
 
+void ili9340_push(ili9340_t *dev, const ili9340_color_t color);
 void ili9340_fill(ili9340_t *dev, const ili9340_color_t color, const uint32_t len);

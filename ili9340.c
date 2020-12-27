@@ -197,12 +197,16 @@ void ili9340_memory_write(ili9340_t *dev) {
 }
 
 
-void ili9340_fill(ili9340_t *dev, const ili9340_color_t color, const uint32_t len) {
+void ili9340_push(ili9340_t *dev, const ili9340_color_t color) {
   spi_device_select(dev);
+  spi_device_send_byte(dev, color.red << 2);
+  spi_device_send_byte(dev, color.green << 2);
+  spi_device_send_byte(dev, color.blue << 2);
+}
 
+
+void ili9340_fill(ili9340_t *dev, const ili9340_color_t color, const uint32_t len) {
   for (uint32_t i = 0; i < len; i++) {
-    spi_device_send_byte(dev, color.red << 2);
-    spi_device_send_byte(dev, color.green << 2);
-    spi_device_send_byte(dev, color.blue << 2);
+    ili9340_push(dev, color);
   }
 }
