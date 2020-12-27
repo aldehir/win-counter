@@ -58,7 +58,7 @@ void render_rectangle(render_context_t *ctx,
 }
 
 
-void render_glyph(render_context_t *ctx, uint16_t x, uint16_t y,
+void render_image(render_context_t *ctx, uint16_t x, uint16_t y,
     const image_t *glyph, const rgb_t *fg, const rgb_t *bg) {
 
   ili9340_color_t fg_6bit, bg_6bit;

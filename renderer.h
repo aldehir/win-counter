@@ -23,5 +23,5 @@ void render_rectangle(render_context_t *ctx,
 #define render_background(ctx, color) \
   render_rectangle((ctx), 0, 0, ILI9340_TFT_WIDTH, ILI9340_TFT_HEIGHT, (color))
 
-void render_glyph(render_context_t *ctx, uint16_t x, uint16_t y,
+void render_image(render_context_t *ctx, uint16_t x, uint16_t y,
     const image_t *glyph, const rgb_t *fg, const rgb_t *bg);
