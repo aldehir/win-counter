@@ -78,15 +78,16 @@ void render_init(render_context_t *ctx, ili9340_t *device) {
 }
 
 
-void render_rectangle(render_context_t *ctx,
-    uint16_t x, uint16_t y, uint16_t width, uint16_t height,
-    const rgb_t *color) {
+void render_rectangle(render_context_t *ctx, const rect_t *rect, const rgb_t *color) {
+  if (rect->width == 0 || rect->height == 0) {
+    return;
+  }
 
   ili9340_color_t color_6bit;
   rgb_to_ili9340_color(color, &color_6bit);
 
-  set_region(ctx, x, y, width,height);
-  fill_to(ctx, &color_6bit, 0, height);
+  set_region(ctx, rect->x, rect->y, rect->width, rect->height);
+  fill_to(ctx, &color_6bit, 0, rect->height);
 }
 
 

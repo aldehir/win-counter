@@ -7,41 +7,36 @@
 #include "debug.h"
 #include "ili9340.h"
 #include "renderer.h"
-#include "resources.h"
+#include "counter.h"
 
 
 ili9340_t tft = {&spi, B2, D6, D5};
 render_context_t renderer;
-
-rgb_t background_color = { 0x23, 0x25, 0x2b };
-rgb_t foreground_color = { 0xff, 0xff, 0xff };
-
-rgb_t white_color = { 0xff, 0xff, 0xff };
-rgb_t red_color = { 0xff, 0x00, 0x66 };
-rgb_t green_color = { 0x00, 0xff, 0xa8 };
-rgb_t gold_color = { 0xff, 0xea, 0x00 };
+counter_display_t display;
+counter_t counter;
 
 
 static void initialize(void) {
   serial_init(&serial0, 115200);
   spi_init(&spi);
+
   ili9340_init(&tft);
   render_init(&renderer, &tft);
+  counter_display_init(&display, &renderer);
+  counter_init(&counter, &display);
 }
 
 
 int main(void) {
   initialize();
 
-  render_background(&renderer, &background_color);
+  counter_display_begin(&display);
+  counter_begin(&counter);
 
-  uint16_t x = ((320 - separator.width) / 2) - 1;
-  uint16_t y = ((240 - separator.height) / 2) - 1;
-
-  render_image(&renderer, x, y, &separator, &white_color, &background_color);
-
-  render_image(&renderer, 55, 30, &glyph_1, &green_color, &background_color);
-  render_image(&renderer, 55 + glyph_1.width, 30, &glyph_0, &green_color, &background_color);
+  for (int i = 0; i < 999; i++) {
+    counter_add_win(&counter);
+    counter_add_loss(&counter);
+  }
 
   while (1);
 
