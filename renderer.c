@@ -40,6 +40,20 @@ static void fill_to(render_context_t *ctx, ili9340_color_t *color,
 }
 
 
+static void read_line_coordinates(uint8_t **ptr, uint16_t *x, uint16_t *y) {
+    *x = pgm_read_word(*ptr);
+    *y = pgm_read_word((*ptr) + 2);
+    *ptr += 4;
+}
+
+
+static uint8_t read_alpha(uint8_t **ptr) {
+    uint8_t alpha = pgm_read_byte(*ptr);
+    (*ptr)++;
+    return alpha;
+}
+
+
 #define to_6bit_color(c) ((c * 63UL) / 255)
 
 static void rgb_to_ili9340_color(const rgb_t *in, ili9340_color_t *out) {
@@ -79,8 +93,9 @@ void render_image(render_context_t *ctx, uint16_t x, uint16_t y,
 
   uint8_t *ptr = image->data;
   uint16_t lines = image->lines;
-  uint16_t line_x = 0;
-  uint16_t line_y = 0;
+  uint16_t line_x;
+  uint16_t line_y;
+  uint8_t alpha;
 
   set_region(ctx, x, y, image->width, image->height);
 
@@ -88,16 +103,11 @@ void render_image(render_context_t *ctx, uint16_t x, uint16_t y,
   ili9340_color_t blend_6bit;
 
   for (uint16_t line = 0; line < lines; line++) {
-    line_x = pgm_read_word(ptr);
-    line_y = pgm_read_word(ptr + 2);
-    ptr += 4;
-
+    read_line_coordinates(&ptr, &line_x, &line_y);
     fill_to(ctx, &bg_6bit, line_x, line_y);
 
     while (1) {
-      uint8_t alpha = pgm_read_byte(ptr);
-      ptr++;
-
+      alpha = read_alpha(&ptr);
       if (!alpha) {
         break;
       }
