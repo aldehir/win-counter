@@ -8,6 +8,7 @@ typedef struct {
   ili9340_t *device;
 } render_context_t;
 
+
 typedef struct {
   uint8_t red;
   uint8_t green;
@@ -15,21 +16,12 @@ typedef struct {
 } rgb_t;
 
 
-#define color_8to6bit(c) ((c * 63UL) / 255)
-#define rgb_to_ili9340_color(c) ((ili9340_color_t){                       \
-      color_8to6bit(c.red), color_8to6bit(c.green), color_8to6bit(c.blue) \
-    })
+void render_rectangle(render_context_t *ctx,
+    uint16_t x, uint16_t y, uint16_t width, uint16_t height,
+    const rgb_t *color);
 
-#define color_alpha_blend(bg, fg, alpha) \
-    (((fg * (uint16_t)alpha) + (bg * (255UL - alpha))) / 255)
+#define render_background(ctx, color) \
+  render_rectangle((ctx), 0, 0, ILI9340_TFT_WIDTH, ILI9340_TFT_HEIGHT, (color))
 
-#define rgb_alpha_blend(bg, fg, alpha) ((rgb_t){         \
-      color_alpha_blend(bg.red, fg.red, alpha),          \
-      color_alpha_blend(bg.green, fg.green, alpha),      \
-      color_alpha_blend(bg.blue, fg.blue, alpha)         \
-    })
-
-
-void draw_glyph(render_context_t *ctx, uint16_t x, uint16_t y,
-    const image_t *glyph, rgb_t fg, rgb_t bg);
-
+void render_glyph(render_context_t *ctx, uint16_t x, uint16_t y,
+    const image_t *glyph, const rgb_t *fg, const rgb_t *bg);

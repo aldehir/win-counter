@@ -3,6 +3,10 @@
 #include "spi.h"
 
 
+#define ILI9340_TFT_WIDTH 320
+#define ILI9340_TFT_HEIGHT 240
+
+
 typedef struct {
   SPI_DEVICE_MEMBERS
 

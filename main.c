@@ -31,15 +31,14 @@ static void initialize(void) {
 int main(void) {
   initialize();
 
-  ili9340_memory_write(&tft);
-  ili9340_fill(&tft, rgb_to_ili9340_color(background_color), 240UL*320UL);
+  render_background(&renderer, &background_color);
 
   uint16_t x = ((320 - glyph_1.width - 2 * glyph_0.width) / 2) - 1;
   uint16_t y = ((240 - glyph_1.height) / 2) - 1;
 
-  draw_glyph(&renderer, x, y, &glyph_1, red_color, background_color);
-  draw_glyph(&renderer, x + glyph_1.width, y, &glyph_0, green_color, background_color);
-  draw_glyph(&renderer, x + glyph_1.width + glyph_0.width, y, &glyph_0, gold_color, background_color);
+  render_glyph(&renderer, x, y, &glyph_1, &red_color, &background_color);
+  render_glyph(&renderer, x + glyph_1.width, y, &glyph_0, &green_color, &background_color);
+  render_glyph(&renderer, x + glyph_1.width + glyph_0.width, y, &glyph_0, &gold_color, &background_color);
 
   while (1);
 
